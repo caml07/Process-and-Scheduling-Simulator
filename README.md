@@ -1,4 +1,4 @@
-# ZenOS Scheduler Simulator
+# CamOS Scheduler Simulator
 
 A web-based OS Process & Scheduling simulator inspired by the Zen Browser aesthetic.
 Built with vanilla HTML5, CSS3, and JavaScript (ES6+) — no frameworks.
