@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZenOS Scheduler</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <!-- ─── SIDEBAR ──────────────────────────────────────────────── -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5" />
+            <circle cx="9" cy="9" r="2.5" fill="currentColor" />
+            <line x1="9" y1="2" x2="9" y2="5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <line x1="9" y1="12.5" x2="9" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <line x1="2" y1="9" x2="5.5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <line x1="12.5" y1="9" x2="16" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </div>
+        <span class="brand-name">CamOS</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="simulator">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+            <rect x="1" y="1" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+            <rect x="8.5" y="1" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+            <rect x="1" y="8.5" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+            <rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+          </svg>
+          Scheduler
+        </button>
+        <button class="nav-item" data-view="gantt">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+            <rect x="1" y="2" width="9" height="2.5" rx="1" fill="currentColor" opacity="0.9" />
+            <rect x="3" y="6.5" width="11" height="2.5" rx="1" fill="currentColor" opacity="0.6" />
+            <rect x="1" y="11" width="6" height="2.5" rx="1" fill="currentColor" opacity="0.9" />
+          </svg>
+          Gantt
+        </button>
+        <button class="nav-item" data-view="metrics">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+            <polyline
+              points="1,13 4,8 7,10 10,4 14,6"
+              stroke="currentColor"
+              stroke-width="1.2"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+          Metrics
+        </button>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-section">
+        <p class="section-label">Algorithm</p>
+        <div class="algo-grid">
+          <button class="algo-btn active" data-algo="RR">Round-Robin</button>
+          <button class="algo-btn" data-algo="SJF">SJF</button>
+          <button class="algo-btn" data-algo="LOTTERY">Lottery</button>
+          <button class="algo-btn" data-algo="CFS">CFS</button>
+        </div>
+      </div>
+
+      <div class="sidebar-section" id="quantum-section">
+        <p class="section-label">Time quantum &nbsp;<span class="param-value" id="quantum-display">4</span></p>
+        <input type="range" id="quantum-slider" min="1" max="16" value="4" class="slider" />
+      </div>
+
+      <div class="sidebar-section">
+        <p class="section-label">Clock speed &nbsp;<span class="param-value" id="speed-display">500 ms</span></p>
+        <input type="range" id="speed-slider" min="1" max="10" value="5" class="slider" />
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-section">
+        <p class="section-label">Controls</p>
+        <div class="controls-row">
+          <button class="ctrl-btn primary" id="btn-play">
+            <svg width="11" height="11" viewBox="0 0 11 11" id="play-icon">
+              <polygon points="1,0.5 10.5,5.5 1,10.5" fill="currentColor" />
+            </svg>
+            <svg width="11" height="11" viewBox="0 0 11 11" id="pause-icon" style="display: none">
+              <rect x="1" y="0.5" width="3" height="10" rx="1" fill="currentColor" />
+              <rect x="7" y="0.5" width="3" height="10" rx="1" fill="currentColor" />
+            </svg>
+            <span id="play-label">Play</span>
+          </button>
+          <button class="ctrl-btn" id="btn-step">Step</button>
+          <button class="ctrl-btn danger" id="btn-reset">Reset</button>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <p class="section-label">Workload</p>
+        <div class="controls-row">
+          <button class="ctrl-btn" id="btn-spawn">+ Process</button>
+          <button class="ctrl-btn warning" id="btn-stress">⚡ Stress</button>
+        </div>
+        <button class="ctrl-btn full-width" id="btn-export" style="margin-top: 8px">↓ Export JSON</button>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="clock-display">
+          <span class="clock-label">TICK</span>
+          <span class="clock-value" id="clock-tick">0</span>
+        </div>
+        <button class="theme-toggle" id="theme-toggle" title="Toggle light/dark">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="2.8" stroke="currentColor" stroke-width="1.2" />
+            <line x1="7" y1="0.5" x2="7" y2="2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            <line x1="7" y1="11.5" x2="7" y2="13.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            <line x1="0.5" y1="7" x2="2.5" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            <line x1="11.5" y1="7" x2="13.5" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            <line x1="2.4" y1="2.4" x2="3.8" y2="3.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            <line
+              x1="10.2"
+              y1="10.2"
+              x2="11.6"
+              y2="11.6"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linecap="round" />
+            <line
+              x1="11.6"
+              y1="2.4"
+              x2="10.2"
+              y2="3.8"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linecap="round" />
+            <line
+              x1="3.8"
+              y1="10.2"
+              x2="2.4"
+              y2="11.6"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ─── MAIN ─────────────────────────────────────────────────── -->
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="sidebar-toggle" id="sidebar-toggle">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+              <line x1="2" y1="8" x2="10" y2="8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+              <line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+          </button>
+          <h1 class="topbar-title">
+            Process Scheduler
+            <span class="algo-badge" id="algo-badge">Round-Robin</span>
+          </h1>
+        </div>
+        <div class="topbar-right">
+          <div class="status-pill" id="sim-status">
+            <div class="status-dot"></div>
+            <span id="sim-status-label">Idle</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="views-container">
+        <!-- VIEW: SIMULATOR -->
+        <section class="view active" id="view-simulator">
+          <div class="lanes">
+            <div class="lane lane-running">
+              <div class="lane-header">
+                <span class="lane-dot running"></span>
+                <span class="lane-title">CPU — Running</span>
+                <span class="lane-count" id="running-count">0</span>
+              </div>
+              <div class="lane-body" id="lane-running">
+                <div class="lane-empty">No process running</div>
+              </div>
+            </div>
+
+            <div class="lane lane-ready">
+              <div class="lane-header">
+                <span class="lane-dot ready"></span>
+                <span class="lane-title">Ready Queue</span>
+                <span class="lane-count" id="ready-count">0</span>
+              </div>
+              <div class="lane-body" id="lane-ready">
+                <div class="lane-empty">Queue empty</div>
+              </div>
+            </div>
+
+            <div class="lane lane-blocked">
+              <div class="lane-header">
+                <span class="lane-dot blocked"></span>
+                <span class="lane-title">Blocked / I/O</span>
+                <span class="lane-count" id="blocked-count">0</span>
+              </div>
+              <div class="lane-body" id="lane-blocked">
+                <div class="lane-empty">No blocked processes</div>
+              </div>
+            </div>
+
+            <div class="lane lane-done">
+              <div class="lane-header">
+                <span class="lane-dot done"></span>
+                <span class="lane-title">Terminated</span>
+                <span class="lane-count" id="done-count">0</span>
+              </div>
+              <div class="lane-body" id="lane-done">
+                <div class="lane-empty">None finished</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW: GANTT -->
+        <section class="view" id="view-gantt">
+          <div class="gantt-wrapper">
+            <div class="gantt-scroll">
+              <div class="gantt-rows" id="gantt-rows">
+                <div class="lane-empty" style="padding: 3rem 2rem; text-align: center">
+                  Run the simulation to generate the Gantt chart
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW: METRICS -->
+        <section class="view" id="view-metrics">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-label">Avg. Wait Time</span>
+              <span class="metric-value" id="m-avg-wait">—</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Avg. Turnaround</span>
+              <span class="metric-value" id="m-avg-turn">—</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Throughput</span>
+              <span class="metric-value" id="m-throughput">—</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">CPU Utilization</span>
+              <span class="metric-value" id="m-cpu-util">—</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Spawned</span>
+              <span class="metric-value" id="m-spawned">0</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Context Switches</span>
+              <span class="metric-value" id="m-ctx-switches">0</span>
+            </div>
+          </div>
+
+          <div class="cfs-panel" id="cfs-panel" style="display: none">
+            <p class="section-label" style="margin-bottom: 14px">CFS Red-Black Tree — sorted by vruntime</p>
+            <div class="rbt-canvas" id="rbt-canvas"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- ─── PCB INSPECTOR ────────────────────────────────────────── -->
+    <div class="inspector-overlay" id="inspector-overlay" style="display: none">
+      <div class="inspector" id="inspector-panel">
+        <div class="inspector-header">
+          <span class="inspector-title">PCB Inspector</span>
+          <button class="inspector-close" id="inspector-close">✕</button>
+        </div>
+        <div class="inspector-body" id="inspector-body"></div>
+        <div class="inspector-footer">
+          <button class="ctrl-btn warning" id="inspector-block">Force I/O Block</button>
+          <button class="ctrl-btn danger" id="inspector-kill">Kill Process</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/Process.js"></script>
+    <script src="js/Scheduler.js"></script>
+    <script src="js/WorkloadGen.js"></script>
+    <script src="js/GanttChart.js"></script>
+    <script src="js/SimClock.js"></script>
+    <script src="js/UI.js"></script>
+  </body>
+</html>
