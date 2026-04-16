@@ -386,11 +386,6 @@ document.querySelectorAll('.nav-item').forEach((btn) => {
   });
 });
 
-// Sidebar toggle
-document.getElementById('sidebar-toggle').addEventListener('click', () => {
-  document.getElementById('sidebar').classList.toggle('collapsed');
-});
-
 // Theme toggle
 document.getElementById('theme-toggle').addEventListener('click', () => {
   const html = document.documentElement;

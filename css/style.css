@@ -128,26 +128,25 @@ body {
   gap: 0; /* Quitamos el gap global para controlarlo por secciones */
 }
 
-/* ── TOOLBAR DE CRISTAL (STICKY) ────────────────────────────── */
+/* ── TOOLBAR DE CRISTAL (NO-STICKY) ────────────────────────────── */
 .header-toolbar {
-  position: sticky;
-  top: 16px;
+  position: relative; /* ¡Esto hace que ya NO te siga al hacer scroll! */
+  margin-top: 16px;
   z-index: 100;
   width: 100%;
   max-width: 1400px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  /* Cristal súper fuerte para que no se mezcle con el texto atrás */
-  background: rgba(24, 24, 37, 0.75);
+  
+  background: rgba(24, 24, 37, 0.75); 
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--border-strong);
-
+  
   border-radius: var(--r-pill);
   padding: 10px 20px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.4);
 }
 
 .brand-info {
