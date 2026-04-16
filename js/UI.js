@@ -1,6 +1,6 @@
 /**
- * UI.js — All DOM rendering and event bindings.
- * This is the "glue" that connects the simulation engine to the HTML.
+ * UI.js — DOM rendering and event bindings.
+ * Cleaned up for the horizontal Zen Aesthetic.
  */
 
 /* ── INIT ─────────────────────────────────────────────────── */
@@ -54,25 +54,22 @@ function renderLane(laneId, processes, countId, rawCount = null) {
 
   if (processes.length === 0) {
     if (!body.querySelector('.lane-empty')) {
-      body.innerHTML = '<div class="lane-empty">—</div>';
+      body.innerHTML = '<div class="lane-empty">No processes here</div>';
     }
     return;
   }
 
-  // Diff-render: only update changed cards
+  // Diff-render
   const existingIds = new Set([...body.querySelectorAll('[data-pid]')].map((el) => el.dataset.pid));
   const newIds = new Set(processes.map((p) => p.pid));
 
-  // Remove cards that no longer exist in this lane
   existingIds.forEach((pid) => {
     if (!newIds.has(pid)) body.querySelector(`[data-pid="${pid}"]`)?.remove();
   });
 
-  // Remove empty placeholder
   body.querySelector('.lane-empty')?.remove();
 
-  // Add or update cards
-  processes.forEach((p, i) => {
+  processes.forEach((p) => {
     let card = body.querySelector(`[data-pid="${p.pid}"]`);
     if (!card) {
       card = buildCard(p);
@@ -98,7 +95,6 @@ function updateCard(card, p) {
 }
 
 function cardHTML(p) {
-  const burstPct = Math.round(p.burstTime > 0 ? ((p.burstTime - p.remainingTime) / p.burstTime) * 100 : 100);
   const remainPct = Math.round(p.burstTime > 0 ? (p.remainingTime / p.burstTime) * 100 : 0);
   const vrtMax = Math.max(p.vruntime, 20);
   const vrtPct = Math.round((p.vruntime / vrtMax) * 100);
@@ -173,7 +169,6 @@ function renderMetrics() {
   document.getElementById('m-spawned').textContent = workloadGen.totalSpawned;
   document.getElementById('m-ctx-switches').textContent = scheduler.contextSwitches;
 
-  // CFS panel visibility
   const cfsPanel = document.getElementById('cfs-panel');
   if (cfsPanel) cfsPanel.style.display = scheduler.algorithm === 'CFS' ? 'block' : 'none';
 }
@@ -185,7 +180,7 @@ function renderCFSTree() {
 
   const nodes = scheduler.cfsTree.toArray();
   if (nodes.length === 0) {
-    canvas.innerHTML = '<span style="color:var(--text-muted);font-size:12px">Tree is empty</span>';
+    canvas.innerHTML = '<span style="color:var(--text-muted);font-size:12px;font-style:italic">Tree is empty</span>';
     return;
   }
 
@@ -207,13 +202,6 @@ function renderCFSTree() {
     wrap.appendChild(lbl);
     canvas.appendChild(wrap);
   });
-
-  // Mark leftmost as the "next to run" (min vruntime)
-  const firstDot = canvas.querySelector('.rbt-node:first-child .rbt-dot');
-  if (firstDot) {
-    firstDot.style.boxShadow = '0 0 0 2px var(--c-running)';
-    firstDot.title += ' ← next';
-  }
 }
 
 /* ── INSPECTOR ──────────────────────────────────────────────── */
@@ -261,7 +249,6 @@ function refreshInspector(pid) {
     )
     .join('');
 
-  // Update footer button states
   document.getElementById('inspector-block').disabled = p.state !== STATE.RUNNING;
   document.getElementById('inspector-kill').disabled = p.state === STATE.DONE;
 }
@@ -271,7 +258,7 @@ function closeInspector() {
   document.getElementById('inspector-overlay').style.display = 'none';
 }
 
-/* ── GANTT RENDER on tab switch ─────────────────────────────── */
+/* ── GANTT RENDER ───────────────────────────────────────────── */
 function renderGantt() {
   const container = document.getElementById('gantt-rows');
   ganttChart.render(container);
@@ -346,13 +333,16 @@ document.querySelectorAll('.algo-btn').forEach((btn) => {
     btn.classList.add('active');
     const algo = btn.dataset.algo;
     scheduler.setAlgorithm(algo);
+
+    // Nombres en minúscula para la estética Serif Zen
     document.getElementById('algo-badge').textContent = {
-      RR: 'Round-Robin',
-      SJF: 'SJF',
-      LOTTERY: 'Lottery',
-      CFS: 'CFS',
+      RR: 'round-robin',
+      SJF: 'sjf',
+      LOTTERY: 'lottery',
+      CFS: 'cfs',
     }[algo];
-    document.getElementById('quantum-section').style.display = algo === 'RR' ? 'block' : 'none';
+
+    document.getElementById('quantum-section').style.display = algo === 'RR' ? 'flex' : 'none';
     renderAll();
   });
 });
@@ -367,7 +357,6 @@ document.getElementById('quantum-slider').addEventListener('input', (e) => {
 // Speed slider
 document.getElementById('speed-slider').addEventListener('input', (e) => {
   const val = parseInt(e.target.value);
-  // 1 = 1500ms (slow), 10 = 100ms (fast)
   const ms = Math.round(1600 - val * 150);
   clock.setSpeed(ms);
   document.getElementById('speed-display').textContent = `${ms} ms`;
